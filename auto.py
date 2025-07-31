@@ -1,29 +1,29 @@
 from ultralytics import YOLO
-from cv2 import imread,waitKey,destroyAllWindows,imshow,resize
+import cv2
+import torch
+
+# Kiểm tra xem GPU có sẵn không
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print(f"Using device: {device}")
 
 # Tải mô hình YOLOv8
-model = YOLO('model.pt')  # Thay 'model.pt' bằng mô hình bạn muốn sử dụng, như 'yolov8n.pt'
+model = YOLO('best.pt').to(device)
 
 # Đọc hình ảnh đầu vào
-img_path = 'Screenshot_2024-08-23-13-55-05-44_948cd9899890cbd5c2798760b2b95377.jpg'
-img = imread(img_path)
-img=resize(img,(400,500))
-# Chạy mô hình YOLO trên hình ảnh
+img_path = 'khong-chi-ngu-quy-xe-may-bien-so-sanh-gia-khung-khong-kem-3.jpg'
+img = cv2.imread(img_path)
+img = cv2.resize(img, (400, 500))
+
+
 results = model(img)
 
-# Hiển thị kết quả trên hình ảnh
 for result in results:
-    p=result.plot()  # plot() sẽ vẽ các bounding boxes lên hình ảnh
+    p = result.plot()
+    cv2.imshow("YOLOv8 Detection", p)
+    cv2.waitKey(0)
 
-    imshow("YOLOv8 Detection", p)
-    waitKey(0)  # Đợi người dùng nhấn phím bất kỳ để đóng cửa sổ
+cv2.destroyAllWindows()
 
-# Đóng tất cả các cửa sổ hiển thị
-destroyAllWindows()
-# Hoặc nếu bạn muốn lưu kết quả:
-# results.save('output_folder')
-
-# Trích xuất các bounding box và trả về tọa độ
 coordinates = []
 for result in results:
     boxes = result.boxes
@@ -40,5 +40,3 @@ for result in results:
             'class_id': int(class_id)
         })
 
-# In ra tọa độ
-print(coordinates)
